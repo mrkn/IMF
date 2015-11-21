@@ -19,6 +19,12 @@ RSpec.describe Ripo::Image, '.detect_format' do
     end
   end
 
+  context 'Given "fixtures/momosan.webp"' do
+    it 'returns :webp' do
+      expect(Ripo::Image.detect_format("spec/fixtures/momosan.webp")).to eq(:webp)
+    end
+  end
+
   context 'Given "fixtures/not_image.txt"' do
     it 'returns nil' do
       expect(Ripo::Image.detect_format("spec/fixtures/not_image.txt")).to eq(nil)
