@@ -1,15 +1,15 @@
 module Ripo
-  module Plugins
-    class PngPlugin
-      FORMAT = :png
+  module FileFormats
+    class GifFormat
+      FORMAT = :gif
 
       EXTENSIONS = %w[
-        .png
+        .gif
       ].map(&:freeze).freeze
 
-      MIME = 'image/png'.freeze
+      MIME = 'image/gif'.freeze
 
-      MAGIC = "\x89PNG\x0d\x0a\x1a\x0a".b.freeze
+      MAGIC = "GIF8"
 
       def self.detect(io)
         magic = io.read(MAGIC.size)
@@ -19,6 +19,6 @@ module Ripo
     end
 
     require 'ripo/image'
-    Ripo::Image.register_format(PngPlugin)
+    Ripo::Image.register_format(GifFormat)
   end
 end

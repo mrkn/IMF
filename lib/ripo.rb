@@ -5,7 +5,4 @@ module Ripo
 end
 
 require "ripo/image"
-require "ripo/plugins/gif_plugin"
-require "ripo/plugins/jpeg_plugin"
-require "ripo/plugins/png_plugin"
-require "ripo/plugins/webp_plugin"
+require "ripo/file_formats"

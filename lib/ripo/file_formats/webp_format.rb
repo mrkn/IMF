@@ -1,6 +1,6 @@
 module Ripo
-  module Plugins
-    class WebpPlugin
+  module FileFormats
+    class WebpFormat
       FORMAT = :webp
 
       EXTENSIONS = %w[
@@ -26,6 +26,6 @@ module Ripo
     end
 
     require 'ripo/image'
-    Ripo::Image.register_format(WebpPlugin)
+    Ripo::Image.register_format(WebpFormat)
   end
 end

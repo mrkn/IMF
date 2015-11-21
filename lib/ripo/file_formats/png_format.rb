@@ -1,18 +1,15 @@
 module Ripo
-  module Plugins
-    class JpegPlugin
-      FORMAT = :jpeg
+  module FileFormats
+    class PngFormat
+      FORMAT = :png
 
       EXTENSIONS = %w[
-        .jfif
-        .jpe
-        .jpg
-        .jpeg
+        .png
       ].map(&:freeze).freeze
 
-      MIME = 'image/jpeg'.freeze
+      MIME = 'image/png'.freeze
 
-      MAGIC = "\xff\xd8".b.freeze
+      MAGIC = "\x89PNG\x0d\x0a\x1a\x0a".b.freeze
 
       def self.detect(io)
         magic = io.read(MAGIC.size)
@@ -22,6 +19,6 @@ module Ripo
     end
 
     require 'ripo/image'
-    Ripo::Image.register_format(JpegPlugin)
+    Ripo::Image.register_format(PngFormat)
   end
 end
