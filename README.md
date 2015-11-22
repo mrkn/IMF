@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/mrkn/IMF.svg?branch=master)](https://travis-ci.org/mrkn/IMF)
+
 # IMF
 
 IMF is a library that provides image manipulation framework for Ruby scripts.
