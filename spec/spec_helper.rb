@@ -25,3 +25,6 @@ RSpec.configure do |config|
 end
 
 require 'IMF'
+
+require 'fileutils'
+require 'tmpdir'
