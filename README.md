@@ -1,13 +1,13 @@
-# Ripo
+# IMF
 
-Ripo is a library that provides image processing opportunity for Rubyists.
+IMF is a library that provides image manipulation framework for Ruby scripts.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'ripo'
+gem 'IMF'
 ```
 
 And then execute:
@@ -16,7 +16,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install ripo
+    $ gem install IMF
 
 ## Usage
 
@@ -30,5 +30,5 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/mrkn/ripo.
+Bug reports and pull requests are welcome on GitHub at https://github.com/mrkn/IMF.
 

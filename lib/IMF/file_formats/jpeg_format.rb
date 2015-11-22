@@ -1,4 +1,4 @@
-module Ripo
+module IMF
   module FileFormats
     class JpegFormat
       FORMAT = :jpeg
@@ -21,7 +21,7 @@ module Ripo
       end
     end
 
-    require 'ripo/image'
-    Ripo::Image.register_format(JpegFormat)
+    require 'IMF/image'
+    IMF::Image.register_format(JpegFormat)
   end
 end

@@ -1,4 +1,4 @@
-module Ripo
+module IMF
   module FileFormats
     class PngFormat
       FORMAT = :png
@@ -18,7 +18,7 @@ module Ripo
       end
     end
 
-    require 'ripo/image'
-    Ripo::Image.register_format(PngFormat)
+    require 'IMF/image'
+    IMF::Image.register_format(PngFormat)
   end
 end

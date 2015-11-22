@@ -1,17 +1,17 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'ripo/version'
+require 'IMF/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "ripo"
-  spec.version       = Ripo::VERSION
+  spec.name          = "IMF"
+  spec.version       = IMF::VERSION
   spec.authors       = ["Kenta Murata"]
   spec.email         = ["mrkn@mrkn.jp"]
 
-  spec.summary       = %q{Ruby Image Processing Opportunity}
-  spec.description   = %q{Ripo is a library that provides image processing opportunity for Rubyists.}
-  spec.homepage      = "https://github.com/mrkn/ripo"
+  spec.summary       = %q{Image Manipulation Framework}
+  spec.description   = %q{IMF is a library that provides image manipulation framework for Ruby scripts.}
+  spec.homepage      = "https://github.com/mrkn/IMF"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = "exe"

@@ -1,4 +1,4 @@
-module Ripo
+module IMF
   module FileFormats
     class GifFormat
       FORMAT = :gif
@@ -18,7 +18,7 @@ module Ripo
       end
     end
 
-    require 'ripo/image'
-    Ripo::Image.register_format(GifFormat)
+    require 'IMF/image'
+    IMF::Image.register_format(GifFormat)
   end
 end

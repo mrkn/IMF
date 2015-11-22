@@ -1,4 +1,4 @@
-module Ripo
+module IMF
   module FileFormats
     class WebpFormat
       FORMAT = :webp
@@ -25,7 +25,7 @@ module Ripo
       end
     end
 
-    require 'ripo/image'
-    Ripo::Image.register_format(WebpFormat)
+    require 'IMF/image'
+    IMF::Image.register_format(WebpFormat)
   end
 end

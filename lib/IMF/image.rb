@@ -1,6 +1,6 @@
-module Ripo
+module IMF
   class Image
-    require 'ripo/image/format_management'
+    require 'IMF/image/format_management'
     extend FormatManagement
 
     def self.detect_format(filename)

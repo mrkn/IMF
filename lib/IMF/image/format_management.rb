@@ -1,4 +1,4 @@
-module Ripo
+module IMF
   class Image
     module FormatManagement
       def register_format(format_plugin)
