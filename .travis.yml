@@ -13,5 +13,6 @@ before_install:
 script: rake spec
 matrix:
   allow_failures:
+    - 1.9.3
     - jruby
     - rbx-2
