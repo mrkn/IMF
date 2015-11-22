@@ -1,18 +1,23 @@
 # File format
 
+- [x] JPEG detection
 - [ ] JPEG loading
 - [ ] JPEG saving
+- [x] PNG detection
 - [ ] PNG loading
 - [ ] PNG saving
+- [x] GIF detection
 - [ ] GIF loading
 - [ ] GIF saving
+- [x] WEBP detection
 - [ ] WEBP loading
 - [ ] WEBP saving
+- [ ] BMP detection
 - [ ] BMP loading
 - [ ] BMP saving
+- [ ] TIFF detection
 - [ ] TIFF loading
 - [ ] TIFF saving
-- [ ] Format detection
 
 # Color spaces
 
