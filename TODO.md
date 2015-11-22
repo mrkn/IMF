@@ -56,3 +56,4 @@
 - [ ] Glitch
 - [ ] Simple displaying
 - [ ] IRuby support
+- [ ] screenshot
