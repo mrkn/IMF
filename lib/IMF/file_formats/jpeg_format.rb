@@ -1,3 +1,5 @@
+require 'libimf'
+
 module IMF
   module FileFormats
     class JpegFormat
@@ -17,6 +19,30 @@ module IMF
       def self.detect(io)
         magic = io.read(MAGIC.size)
         MAGIC === magic
+      end
+
+      def self.open(io, filename)
+        JpegImageFile.new(io, filename)
+        decoder = JpegDecoder.new(io)
+        size = decoder.image_size
+        mode = decoder.colorspace
+      end
+
+      class JpegImageFile < IMF::Image
+        def initialize(io, filename)
+          @io = io
+          @filename = filename
+          mode, size = read_header()
+          super(mode, size, fill_color: nil)
+        end
+
+        def load
+        end
+
+        private
+
+        def read_header()
+        end
       end
     end
 
