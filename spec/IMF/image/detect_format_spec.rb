@@ -8,7 +8,6 @@ RSpec.describe IMF::Image, '.detect_format' do
 
   context 'Given a non-existing filename' do
     it 'raises IOError', :with_tmpdir do
-      expect(Dir.pwd).to eq(top_dir)
       expect {
         IMF::Image.detect_format(File.join(tmpdir, 'non_existing.jpg'))
       }.to raise_error(Errno::ENOENT)
@@ -17,7 +16,6 @@ RSpec.describe IMF::Image, '.detect_format' do
 
   context 'Given a directory name' do
     it 'raises IOError', :with_tmpdir do
-      expect(Dir.pwd).to eq(top_dir)
       expect {
         IMF::Image.detect_format(tmpdir)
       }.to raise_error(Errno::EISDIR)
@@ -50,7 +48,6 @@ RSpec.describe IMF::Image, '.detect_format' do
 
     context 'When the IO object is not readable' do
       it 'raises IOError and does not close the passed IO object', :run_in_tmpdir do
-        expect(Dir.pwd).not_to eq(top_dir)
         FileUtils.cp(fixture_file("vimlogo-141x141.gif"), "tmp.gif")
         open("tmp.gif", "wb") do |io|
           expect {
