@@ -89,21 +89,36 @@ RSpec.describe IMF::Image, '.detect_format' do
     end
   end
 
-  context 'Given "fixtures/momosan.jpg"' do
-    it 'returns :jpeg' do
-      expect(IMF::Image.detect_format(fixture_file("momosan.jpg"))).to eq(:jpeg)
+
+  context 'Given a JPEG image' do
+    let(:image_filename) do
+      fixture_file("momosan.jpg")
+    end
+
+    context 'Given a filename of the image' do
+      it 'returns :jpeg' do
+        expect(IMF::Image.detect_format(image_filename)).to eq(:jpeg)
+      end
     end
   end
 
-  context 'Given "fixtures/vimlogo-141x141.png"' do
+  context 'Given a PNG image' do
+    let(:image_filename) do
+      fixture_file("vimlogo-141x141.png")
+    end
+
     it 'returns :png' do
-      expect(IMF::Image.detect_format(fixture_file("vimlogo-141x141.png"))).to eq(:png)
+      expect(IMF::Image.detect_format(image_filename)).to eq(:png)
     end
   end
 
-  context 'Given "fixtures/momosan.webp"' do
+  context 'Given a WEBP image' do
+    let(:image_filename) do
+      fixture_file("momosan.webp")
+    end
+
     it 'returns :webp' do
-      expect(IMF::Image.detect_format(fixture_file("momosan.webp"))).to eq(:webp)
+      expect(IMF::Image.detect_format(image_filename)).to eq(:webp)
     end
   end
 
