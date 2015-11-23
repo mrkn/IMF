@@ -2,23 +2,25 @@ require 'spec_helper'
 require 'zlib'
 
 RSpec.describe IMF::Image, '.detect_format' do
+  let(:top_dir) do
+    File.expand_path('../../../../', __FILE__)
+  end
+
   context 'Given a non-existing filename' do
-    it 'raises IOError' do
-      Dir.mktmpdir do |tmpdir|
-        expect {
-          IMF::Image.detect_format(File.join(tmpdir, 'non_existing.jpg'))
-        }.to raise_error(Errno::ENOENT)
-      end
+    it 'raises IOError', :with_tmpdir do
+      expect(Dir.pwd).to eq(top_dir)
+      expect {
+        IMF::Image.detect_format(File.join(tmpdir, 'non_existing.jpg'))
+      }.to raise_error(Errno::ENOENT)
     end
   end
 
   context 'Given a directory name' do
-    it 'raises IOError' do
-      Dir.mktmpdir do |tmpdir|
-        expect {
-          IMF::Image.detect_format(File.join(tmpdir))
-        }.to raise_error(Errno::EISDIR)
-      end
+    it 'raises IOError', :with_tmpdir do
+      expect(Dir.pwd).to eq(top_dir)
+      expect {
+        IMF::Image.detect_format(tmpdir)
+      }.to raise_error(Errno::EISDIR)
     end
   end
 
@@ -47,15 +49,14 @@ RSpec.describe IMF::Image, '.detect_format' do
     end
 
     context 'When the IO object is not readable' do
-      it 'raises IOError and does not close the passed IO object' do
-        Dir.mktmpdir do |tmpdir|
-          FileUtils.cp(fixture_file("vimlogo-141x141.gif"), File.join(tmpdir, "tmp.gif"))
-          open(File.join(tmpdir, "tmp.gif"), "wb") do |io|
-            expect {
-              IMF::Image.detect_format(io)
-            }.to raise_error(IOError)
-            expect(io).not_to be_closed
-          end
+      it 'raises IOError and does not close the passed IO object', :run_in_tmpdir do
+        expect(Dir.pwd).not_to eq(top_dir)
+        FileUtils.cp(fixture_file("vimlogo-141x141.gif"), "tmp.gif")
+        open("tmp.gif", "wb") do |io|
+          expect {
+            IMF::Image.detect_format(io)
+          }.to raise_error(IOError)
+          expect(io).not_to be_closed
         end
       end
     end
