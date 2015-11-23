@@ -2,10 +2,6 @@ require 'spec_helper'
 require 'zlib'
 
 RSpec.describe IMF::Image, '.detect_format' do
-  let(:top_dir) do
-    File.expand_path('../../../../', __FILE__)
-  end
-
   context 'Given a non-existing filename' do
     it 'raises IOError', :with_tmpdir do
       expect {
