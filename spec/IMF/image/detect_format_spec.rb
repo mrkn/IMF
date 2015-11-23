@@ -69,9 +69,15 @@ RSpec.describe IMF::Image, '.detect_format' do
       end
     end
 
-    context 'Given a Zlib::GzipReader object of the gzipped image' do
+    context 'Given a Zlib::GzipReader object of the gzipped image', :with_tmpdir do
       let(:gzipped_image_filename) do
-        image_filename + '.gz'
+        File.join(tmpdir, File.basename(image_filename) + '.gz')
+      end
+
+      before do
+        Zlib::GzipWriter.open(gzipped_image_filename) do |gzio|
+          gzio.write(IO.read(image_filename, mode: 'rb'))
+        end
       end
 
       it 'returns :gif and does not close the passed IO object' do
