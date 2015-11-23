@@ -17,6 +17,7 @@ module IMF
         raise ArgumentError, "The argument must be a filename or a reeadable IO"
       end
       each_registered_format do |format_name, format_plugin|
+        io.rewind
         if format_plugin.detect(io)
           return format_name
         end

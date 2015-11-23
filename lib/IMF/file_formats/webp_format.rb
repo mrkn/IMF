@@ -18,7 +18,6 @@ module IMF
 
       def self.detect(io)
         prefix = io.read(PREFIX_SIZE)
-        io.rewind
         MAGICS.all? do |range, magic|
           magic === prefix[range]
         end

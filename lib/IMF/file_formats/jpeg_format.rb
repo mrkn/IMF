@@ -16,7 +16,6 @@ module IMF
 
       def self.detect(io)
         magic = io.read(MAGIC.size)
-        io.rewind
         MAGIC === magic
       end
     end

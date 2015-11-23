@@ -56,19 +56,21 @@ RSpec.describe IMF::Image, '.detect_format' do
 
     context 'Given a IO object of the image' do
       context 'When the IO object is readable' do
-        it "returns #{image_format.inspect} and does not close the passed IO object" do
+        it "returns #{image_format.inspect}, and does not close and rewind the passed IO object" do
           open(image_filename, "rb") do |io|
             expect(IMF::Image.detect_format(io)).to eq(image_format)
             expect(io).not_to be_closed
+            expect(io.tell).not_to eq(0)
           end
         end
       end
     end
 
     context 'Given a StringIO object of the image' do
-      it "returns #{image_format}" do
+      it "returns #{image_format}, and does not rewind the passed StringIO object" do
         strio = StringIO.new(IO.read(image_filename, mode: "rb"))
         expect(IMF::Image.detect_format(strio)).to eq(image_format)
+        expect(strio.tell).not_to eq(0)
       end
     end
 
@@ -83,10 +85,11 @@ RSpec.describe IMF::Image, '.detect_format' do
         end
       end
 
-      it "returns #{image_format} and does not close the passed IO object" do
+      it "returns #{image_format}, and does not close and rewind the passed IO object" do
         Zlib::GzipReader.open(gzipped_image_filename) do |gzio|
           expect(IMF::Image.detect_format(gzio)).to eq(image_format)
           expect(gzio).not_to be_closed
+          expect(gzio.tell).not_to eq(0)
         end
       end
     end
