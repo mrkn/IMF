@@ -50,7 +50,7 @@ RSpec.describe IMF::Image, '.detect_format' do
       it 'raises IOError and does not close the passed IO object' do
         Dir.mktmpdir do |tmpdir|
           FileUtils.cp(fixture_file("vimlogo-141x141.gif"), File.join(tmpdir, "tmp.gif"))
-          open("tmp.gif", "wb") do |io|
+          open(File.join(tmpdir, "tmp.gif"), "wb") do |io|
             expect {
               IMF::Image.detect_format(io)
             }.to raise_error(IOError)
