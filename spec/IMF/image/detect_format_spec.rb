@@ -40,35 +40,45 @@ RSpec.describe IMF::Image, '.detect_format' do
     end
   end
 
-  context 'Given "fixtures/vimlogo-141x141.gif"' do
-    it 'returns :gif' do
-      expect(IMF::Image.detect_format(fixture_file("vimlogo-141x141.gif"))).to eq(:gif)
+  context 'Given a GIF image' do
+    let(:image_filename) do
+      fixture_file("vimlogo-141x141.gif")
     end
-  end
 
-  context 'Given a IO object of GIF file' do
-    context 'When the IO object is readable' do
-      it 'returns :gif and does not close the passed IO object' do
-        open(fixture_file("vimlogo-141x141.gif"), "rb") do |io|
-          expect(IMF::Image.detect_format(io)).to eq(:gif)
-          expect(io).not_to be_closed
+    context 'Given a filename of the image' do
+      it 'returns :gif' do
+        expect(IMF::Image.detect_format(image_filename)).to eq(:gif)
+      end
+    end
+
+    context 'Given a IO object of the image' do
+      context 'When the IO object is readable' do
+        it 'returns :gif and does not close the passed IO object' do
+          open(image_filename, "rb") do |io|
+            expect(IMF::Image.detect_format(io)).to eq(:gif)
+            expect(io).not_to be_closed
+          end
         end
       end
     end
-  end
 
-  context 'Given a StringIO object of GIF file' do
-    it 'returns :gif' do
-      strio = StringIO.new(IO.read(fixture_file("vimlogo-141x141.gif"), mode: "rb"))
-      expect(IMF::Image.detect_format(strio)).to eq(:gif)
+    context 'Given a StringIO object of the image' do
+      it 'returns :gif' do
+        strio = StringIO.new(IO.read(image_filename, mode: "rb"))
+        expect(IMF::Image.detect_format(strio)).to eq(:gif)
+      end
     end
-  end
 
-  context 'Given a Zlib::GzipReader object of Gzipped GIF file' do
-    it 'returns :gif and does not close the passed IO object' do
-      Zlib::GzipReader.open(fixture_file("vimlogo-141x141.gif.gz")) do |gzio|
-        expect(IMF::Image.detect_format(gzio)).to eq(:gif)
-        expect(gzio).not_to be_closed
+    context 'Given a Zlib::GzipReader object of the gzipped image' do
+      let(:gzipped_image_filename) do
+        image_filename + '.gz'
+      end
+
+      it 'returns :gif and does not close the passed IO object' do
+        Zlib::GzipReader.open(gzipped_image_filename) do |gzio|
+          expect(IMF::Image.detect_format(gzio)).to eq(:gif)
+          expect(gzio).not_to be_closed
+        end
       end
     end
   end
