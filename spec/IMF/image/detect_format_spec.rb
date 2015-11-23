@@ -40,22 +40,18 @@ RSpec.describe IMF::Image, '.detect_format' do
     end
   end
 
-  context 'Given a GIF image' do
-    let(:image_filename) do
-      fixture_file("vimlogo-141x141.gif")
-    end
-
+  shared_examples 'Normal conditions' do |image_format|
     context 'Given a filename of the image' do
-      it 'returns :gif' do
-        expect(IMF::Image.detect_format(image_filename)).to eq(:gif)
+      it "returns #{image_format.inspect}" do
+        expect(IMF::Image.detect_format(image_filename)).to eq(image_format)
       end
     end
 
     context 'Given a IO object of the image' do
       context 'When the IO object is readable' do
-        it 'returns :gif and does not close the passed IO object' do
+        it "returns #{image_format.inspect} and does not close the passed IO object" do
           open(image_filename, "rb") do |io|
-            expect(IMF::Image.detect_format(io)).to eq(:gif)
+            expect(IMF::Image.detect_format(io)).to eq(image_format)
             expect(io).not_to be_closed
           end
         end
@@ -63,9 +59,9 @@ RSpec.describe IMF::Image, '.detect_format' do
     end
 
     context 'Given a StringIO object of the image' do
-      it 'returns :gif' do
+      it "returns #{image_format}" do
         strio = StringIO.new(IO.read(image_filename, mode: "rb"))
-        expect(IMF::Image.detect_format(strio)).to eq(:gif)
+        expect(IMF::Image.detect_format(strio)).to eq(image_format)
       end
     end
 
@@ -80,26 +76,29 @@ RSpec.describe IMF::Image, '.detect_format' do
         end
       end
 
-      it 'returns :gif and does not close the passed IO object' do
+      it "returns #{image_format} and does not close the passed IO object" do
         Zlib::GzipReader.open(gzipped_image_filename) do |gzio|
-          expect(IMF::Image.detect_format(gzio)).to eq(:gif)
+          expect(IMF::Image.detect_format(gzio)).to eq(image_format)
           expect(gzio).not_to be_closed
         end
       end
     end
   end
 
+  context 'Given a GIF image' do
+    let(:image_filename) do
+      fixture_file("vimlogo-141x141.gif")
+    end
+
+    include_examples 'Normal conditions', :gif
+  end
 
   context 'Given a JPEG image' do
     let(:image_filename) do
       fixture_file("momosan.jpg")
     end
 
-    context 'Given a filename of the image' do
-      it 'returns :jpeg' do
-        expect(IMF::Image.detect_format(image_filename)).to eq(:jpeg)
-      end
-    end
+    include_examples 'Normal conditions', :jpeg
   end
 
   context 'Given a PNG image' do
@@ -107,9 +106,7 @@ RSpec.describe IMF::Image, '.detect_format' do
       fixture_file("vimlogo-141x141.png")
     end
 
-    it 'returns :png' do
-      expect(IMF::Image.detect_format(image_filename)).to eq(:png)
-    end
+    include_examples 'Normal conditions', :png
   end
 
   context 'Given a WEBP image' do
@@ -117,9 +114,7 @@ RSpec.describe IMF::Image, '.detect_format' do
       fixture_file("momosan.webp")
     end
 
-    it 'returns :webp' do
-      expect(IMF::Image.detect_format(image_filename)).to eq(:webp)
-    end
+    include_examples 'Normal conditions', :webp
   end
 
   context 'Given "fixtures/not_image.txt"' do
