@@ -19,6 +19,13 @@ RSpec.describe IMF::Image, '.detect_format' do
       end
     end
 
+    context 'Given a non-image file' do
+      it 'returns nil', :run_in_tmpdir do
+        IO.write('not_image.txt', 'not image file', mode: 'wb')
+        expect(IMF::Image.detect_format('not_image.txt')).to eq(nil)
+      end
+    end
+
     context 'Given an object not a string nor an IO' do
       it 'raises ArgumentError' do
         expect {
@@ -115,11 +122,5 @@ RSpec.describe IMF::Image, '.detect_format' do
     end
 
     include_examples 'Normal conditions', :webp
-  end
-
-  context 'Given "fixtures/not_image.txt"' do
-    it 'returns nil' do
-      expect(IMF::Image.detect_format(fixture_file("not_image.txt"))).to eq(nil)
-    end
   end
 end
