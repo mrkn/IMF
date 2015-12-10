@@ -32,11 +32,17 @@ module IMF
         def initialize(io, filename)
           @io = io
           @filename = filename
-          mode, size = read_header()
-          super(mode, size, fill_color: nil)
+          @decoder = IMF::JpegDecoder.new(@io)
+          header = @decoder.read_header()
+          if header.no_image
+            raise "no image"  # TODO: specify exception class and appropriate message
+          end
+          size = [header.image_width, header.image_height]
+          super(header.color_space, size, fill_color: nil)
         end
 
         def load
+          @decoder.decode_image(self)
         end
 
         private
