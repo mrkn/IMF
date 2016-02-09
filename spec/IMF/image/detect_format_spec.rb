@@ -4,7 +4,7 @@ require 'zlib'
 RSpec.describe IMF::Image, '.detect_format' do
   describe 'Abnormal conditions' do
     context 'Given a non-existing filename' do
-      it 'raises IOError', :with_tmpdir do
+      it 'raises Errno::ENOENT', :with_tmpdir do
         expect {
           IMF::Image.detect_format(File.join(tmpdir, 'non_existing.jpg'))
         }.to raise_error(Errno::ENOENT)
@@ -12,7 +12,7 @@ RSpec.describe IMF::Image, '.detect_format' do
     end
 
     context 'Given a directory name' do
-      it 'raises IOError', :with_tmpdir do
+      it 'raises Errno::EISDIR', :with_tmpdir do
         expect {
           IMF::Image.detect_format(tmpdir)
         }.to raise_error(Errno::EISDIR)
