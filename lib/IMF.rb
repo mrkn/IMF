@@ -6,3 +6,4 @@ end
 
 require "IMF/image"
 require "IMF/file_formats"
+require "IMF/native"
