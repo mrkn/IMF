@@ -34,6 +34,15 @@ RSpec.xdescribe IMF::Image, '.open' do
       end
     end
 
+    context 'Given a closed IO' do
+      it 'raises ArgumentError' do
+        expect {
+          closed_io = $stdin.dup.close
+          IMF::Image.open(closed_io)
+        }.to raise_error(ArgumentError)
+      end
+    end
+
     context 'Given an object not a string nor a pathname' do
       it 'raises ArgumentError' do
         expect {
