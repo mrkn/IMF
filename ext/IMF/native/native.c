@@ -86,8 +86,10 @@ static rb_data_type_t imf_image_data_type = {
     imf_image_free,
     imf_image_memsize,
   },
+#ifdef RUBY_TYPED_FREE_IMMEDIATELY
   0, 0,
   RUBY_TYPED_FREE_IMMEDIATELY
+#endif
 };
 
 bool

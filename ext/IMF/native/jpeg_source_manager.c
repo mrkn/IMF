@@ -33,8 +33,10 @@ static rb_data_type_t imf_jpeg_src_mgr_data_type = {
     imf_jpeg_src_mgr_free,
     imf_jpeg_src_mgr_memsize,
   },
+#ifdef RUBY_TYPED_FREE_IMMEDIATELY
   0, 0,
   RUBY_TYPED_FREE_IMMEDIATELY
+#endif
 };
 
 imf_jpeg_src_mgr_t *
