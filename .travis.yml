@@ -1,18 +1,31 @@
 ---
 language: ruby
+
 rvm:
-  - 1.9.3
-  - 2.0.0
-  - 2.1.7
-  - 2.2.3
-  - ruby-head
-  - jruby
-  - rbx-2
+- ruby-head
+- 2.3
+- 2.2
+- 2.1
+- 2.0.0
+- 1.9.3
+- jruby
+- rbx-2
+
 before_install:
-  - gem install bundler
-script: rake spec
+- gem install bundler
+
+script:
+- rake clobber compile spec
+
 matrix:
   allow_failures:
-    - rvm: 1.9.3
-    - rvm: jruby
-    - rvm: rbx-2
+  - rvm: 1.9.3
+  - rvm: jruby
+  - rvm: rbx-2
+
+addons:
+  apt:
+    packages:
+    - libjpeg-dev
+    - libpng-dev
+    - libwebp-dev
