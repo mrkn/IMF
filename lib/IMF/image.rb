@@ -2,6 +2,9 @@ require 'stringio'
 require 'pathname'
 require 'uri'
 
+require 'IMF/native'
+require 'IMF/image_source'
+
 module IMF
   class Image
     require 'IMF/image/format_management'
@@ -25,6 +28,11 @@ module IMF
       nil
     ensure
       io.close if io && io != file
+    end
+
+    def self.open(source)
+      image_source = ImageSource.new(source)
+      load_image(image_source)
     end
   end
 end

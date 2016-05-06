@@ -1,9 +1,10 @@
 require "IMF/version"
 
 module IMF
-  # Your code goes here...
+  class Error < StandardError
+  end
 end
 
+require "IMF/native"
 require "IMF/image"
 require "IMF/file_formats"
-require "IMF/native"
