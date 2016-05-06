@@ -10,3 +10,4 @@
 /tmp/
 /lib/**/*.bundle
 /lib/**/*.so
+.*
