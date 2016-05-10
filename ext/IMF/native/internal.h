@@ -6,8 +6,21 @@
 #undef EXTERN
 #include <jpeglib.h>
 
+#include <png.h>
+
+enum imf_color_space {
+  IMF_COLOR_SPACE_GRAY = 0,
+  IMF_COLOR_SPACE_RGB  = 1,
+};
+
+enum imf_image_flags {
+  IMF_IMAGE_FLAG_HAS_ALPHA = (1<<0),
+};
+
 typedef struct imf_image imf_image_t;
 struct imf_image {
+  uint8_t flags;
+  enum imf_color_space color_space;
   uint8_t component_size;
   uint8_t pixel_channels;
   size_t width;
@@ -18,6 +31,17 @@ struct imf_image {
 };
 
 #define IMF_IMAGE(ptr) ((imf_image_t *)(ptr))
+
+#define IMF_IMAGE_FLAG_TEST(img, f) (IMF_IMAGE(img)->flags & (f))
+#define IMF_IMAGE_FLAG_ANY(img, f) IMF_IMAGE_FLAG_TEST(img, f)
+#define IMF_IMAGE_FLAG_ALL(img, f) (IMF_IMAGE_FLAG_TEST(img, f) == (f))
+#define IMF_IMAGE_FLAG_SET(img, f) (void)(IMF_IMAGE(img)->flags |= (f))
+#define IMF_IMAGE_FLAG_UNSET(img, f) (void)(IMF_IMAGE(img)->flags &= ~(f))
+#define IMF_IMAGE_FLAG_TOGGLE(img, f) (void)(IMF_IMAGE(img)->flags ^= (f))
+
+#define IMF_IMAGE_HAS_ALPHA(img) IMF_IMAGE_FLAG_TEST(img, IMF_IMAGE_FLAG_HAS_ALPHA)
+#define IMF_IMAGE_SET_ALPHA(img) IMF_IMAGE_FLAG_SET(img, IMF_IMAGE_FLAG_HAS_ALPHA)
+#define IMF_IMAGE_UNSET_ALPHA(img) IMF_IMAGE_FLAG_UNSET(img, IMF_IMAGE_FLAG_HAS_ALPHA)
 
 bool is_imf_image(VALUE obj);
 imf_image_t *get_imf_image(VALUE obj);
