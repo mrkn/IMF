@@ -65,6 +65,7 @@ RSpec.describe IMF::Image, '.open' do
     it 'returns an image object' do
       is_expected.to be_a(IMF::Image)
       expect(subject.color_space).to eq(:RGB)
+      expect(subject.has_alpha?).to eq(false)
       expect(subject.component_size).to eq(1)
       expect(subject.pixel_channels).to eq(3)
       expect(subject.width).to eq(809)
@@ -88,6 +89,7 @@ RSpec.describe IMF::Image, '.open' do
       it 'returns an image object' do
         is_expected.to be_a(IMF::Image)
         expect(subject.color_space).to eq(:RGB)
+        expect(subject.has_alpha?).to eq(false)
         expect(subject.component_size).to eq(1)
         expect(subject.pixel_channels).to eq(3)
         expect(subject.width).to eq(809)
@@ -97,14 +99,14 @@ RSpec.describe IMF::Image, '.open' do
     end
   end
 
-  xcontext 'Given a PNG image' do
+  context 'Given a PNG image' do
     let(:image_filename) do
       fixture_file("momosan.png")
     end
 
     context 'the given filename ends with ".jpg"', :run_in_tmpdir do
       let(:original_image_filename) do
-        fixture_file("momosan.png")
+        fixture_file("vimlogo-141x141.png")
       end
 
       let(:image_filename) do
@@ -117,6 +119,13 @@ RSpec.describe IMF::Image, '.open' do
 
       it 'returns an image object' do
         is_expected.to be_a(IMF::Image)
+        expect(subject.color_space).to eq(:RGB)
+        expect(subject.has_alpha?).to eq(true)
+        expect(subject.component_size).to eq(1)
+        expect(subject.pixel_channels).to eq(4)
+        expect(subject.width).to eq(141)
+        expect(subject.height).to eq(141)
+        expect(subject.row_stride).to eq(144)
       end
     end
   end
