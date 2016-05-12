@@ -15,4 +15,6 @@ unless have_header('png.h') && have_library('png') && have_header('zlib.h') && h
   abort
 end
 
+have_type('png_alloc_size_t')
+
 create_makefile('IMF/native')

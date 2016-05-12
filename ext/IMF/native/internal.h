@@ -8,6 +8,10 @@
 
 #include <png.h>
 
+#ifndef HAVE_TYPE_PNG_ALLOC_SIZE_T
+typedef png_size_t png_alloc_size_t;
+#endif
+
 enum imf_color_space {
   IMF_COLOR_SPACE_GRAY = 0,
   IMF_COLOR_SPACE_RGB  = 1,
