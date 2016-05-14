@@ -1,15 +1,15 @@
 module IMF
-  module FileFormats
-    class GifFormat
-      FORMAT = :gif
+  module FileFormat
+    class PngFormat
+      FORMAT = :png
 
       EXTENSIONS = %w[
-        .gif
+        .png
       ].map(&:freeze).freeze
 
-      MIME = 'image/gif'.freeze
+      MIME = 'image/png'.freeze
 
-      MAGIC = "GIF8"
+      MAGIC = "\x89PNG\x0d\x0a\x1a\x0a".b.freeze
 
       def self.detect(io)
         magic = io.read(MAGIC.size)
@@ -18,6 +18,6 @@ module IMF
     end
 
     require 'IMF/image'
-    IMF::Image.register_format(GifFormat)
+    IMF::Image.register_format(PngFormat)
   end
 end

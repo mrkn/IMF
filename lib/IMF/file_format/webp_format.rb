@@ -1,5 +1,5 @@
 module IMF
-  module FileFormats
+  module FileFormat
     class WebpFormat
       FORMAT = :webp
 

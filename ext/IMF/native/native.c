@@ -167,7 +167,7 @@ imf_image_allocate_image_buffer(imf_image_t *img)
 static bool
 imf_jpeg_guess(VALUE image_source)
 {
-  VALUE jpeg_format = rb_path2class("IMF::FileFormats::JpegFormat");
+  VALUE jpeg_format = rb_path2class("IMF::FileFormat::JpegFormat");
   VALUE res = rb_funcall(jpeg_format, id_detect, 1, image_source);
   rb_funcall(image_source, id_rewind, 0);
   return RTEST(res);
@@ -176,7 +176,7 @@ imf_jpeg_guess(VALUE image_source)
 static bool
 imf_png_guess(VALUE image_source)
 {
-  VALUE png_format = rb_path2class("IMF::FileFormats::PngFormat");
+  VALUE png_format = rb_path2class("IMF::FileFormat::PngFormat");
   VALUE res = rb_funcall(png_format, id_detect, 1, image_source);
   rb_funcall(image_source, id_rewind, 0);
   return RTEST(res);
@@ -609,7 +609,7 @@ Init_imf_image(void)
   rb_define_method(imf_cIMF_Image, "height", imf_image_get_height, 0);
   rb_define_method(imf_cIMF_Image, "row_stride", imf_image_get_row_stride, 0);
 
-  rb_require("IMF/file_formats");
+  rb_require("IMF/file_format");
 }
 
 void Init_imf_jpeg_src_mgr(void);
