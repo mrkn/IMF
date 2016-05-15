@@ -121,11 +121,19 @@ RSpec.describe IMF::FileFormatRegistry do
 end
 
 RSpec.describe IMF, '.file_formats' do
-  pending
+  subject do
+    IMF.file_formats
+  end
+
+  it { is_expected.to be_an(Array) }
 end
 
 RSpec.describe IMF, '.register_file_format' do
-  pending
+  it 'registers a file format' do
+    IMF.register_file_format(IMF::RSpec::TestFileFormat)
+    expect(IMF.file_formats).to include(IMF::RSpec::TestFileFormat)
+    IMF.unregister_file_format(IMF::RSpec::TestFileFormat)
+  end
 end
 
 RSpec.describe IMF, '.unregister_file_format' do
@@ -133,9 +141,29 @@ RSpec.describe IMF, '.unregister_file_format' do
 end
 
 RSpec.describe IMF, '.each_file_format' do
-  pending
-end
+  before do
+    IMF.register_file_format(IMF::RSpec::TestFileFormat)
+  end
 
-RSpec.describe IMF, '.each_file_format_for_extname' do
-  pending
+  let(:registered_file_formats) do
+    IMF.file_formats
+  end
+
+  specify do
+    expect { |probe|
+      IMF.each_file_format(&probe)
+    }.to yield_successive_args(*registered_file_formats)
+  end
+
+  context 'Given an extname parameter' do
+    before do
+      IMF.register_file_format(IMF::RSpec::AnotherTestFileFormat)
+    end
+
+    specify do
+      expect { |probe|
+        IMF.each_file_format(extname: '.tst', &probe)
+      }.to yield_successive_args(IMF::RSpec::TestFileFormat, IMF::RSpec::AnotherTestFileFormat)
+    end
+  end
 end

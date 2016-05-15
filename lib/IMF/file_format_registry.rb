@@ -32,6 +32,14 @@ module IMF
       unregister_for_extnames(file_format)
     end
 
+    def each(extname: nil, &block)
+      if extname
+        extname_table[extname].each_key(&block)
+      else
+        file_format_table.each_key(&block)
+      end
+    end
+
     private
 
     def check_file_format(file_format)
@@ -74,4 +82,30 @@ module IMF
       @extname_table ||= Hash.new {|h, k| h[k] = Hash.new(false) }
     end
   end
+
+  module GlobalFileFormatRegistry
+    def file_formats
+      global_file_format_registry.file_formats
+    end
+
+    def register_file_format(file_format)
+      global_file_format_registry.register(file_format)
+    end
+
+    def unregister_file_format(file_format)
+      global_file_format_registry.unregister(file_format)
+    end
+
+    def each_file_format(extname: nil, &block)
+      global_file_format_registry.each(extname: extname, &block)
+    end
+
+    private
+
+    def global_file_format_registry
+      @global_file_format_registry ||= FileFormatRegistry.new
+    end
+  end
+
+  extend GlobalFileFormatRegistry
 end
