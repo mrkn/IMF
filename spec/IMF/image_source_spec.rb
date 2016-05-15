@@ -132,4 +132,22 @@ RSpec.describe IMF::ImageSource do
       include_examples 'rewind'
     end
   end
+
+  describe '#path' do
+    subject do
+      image_source.path
+    end
+
+    context 'Given image_source is initialized with a path' do
+      include_context 'image file source'
+
+      it { is_expected.to eq(image_path) }
+    end
+
+    context 'Given image_source is initialized with a Zlib::GzipReader object' do
+      include_context 'gzipped io source'
+
+      it { is_expected.to eq(nil) }
+    end
+  end
 end

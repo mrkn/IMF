@@ -20,6 +20,8 @@ module IMF
       end
     end
 
+    attr_reader :path
+
     def read(length = nil, outbuf = '')
       init_with_io(File.open(@path, 'rb')) unless @source
 
