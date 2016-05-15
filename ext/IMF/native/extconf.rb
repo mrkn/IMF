@@ -1,5 +1,7 @@
 require 'mkmf'
 
+$CFLAGS += " -I#{File.expand_path('../../include', __FILE__)}"
+
 dir_config('jpeg')
 
 unless have_header('jpeglib.h') && have_library('jpeg')
