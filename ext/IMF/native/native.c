@@ -613,6 +613,7 @@ Init_imf_image(void)
 }
 
 void Init_imf_jpeg_src_mgr(void);
+void Init_imf_file_format(void);
 
 void
 Init_native(void)
@@ -620,6 +621,7 @@ Init_native(void)
   imf_mIMF = rb_define_module("IMF");
 
   Init_imf_image();
+  Init_imf_file_format();
   Init_imf_jpeg_src_mgr();
 
   imf_cIMF_ImageSource = rb_define_class_under(imf_mIMF, "ImageSource", rb_cObject);
