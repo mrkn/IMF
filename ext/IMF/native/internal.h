@@ -47,7 +47,6 @@ struct imf_image {
 #define IMF_IMAGE_SET_ALPHA(img) IMF_IMAGE_FLAG_SET(img, IMF_IMAGE_FLAG_HAS_ALPHA)
 #define IMF_IMAGE_UNSET_ALPHA(img) IMF_IMAGE_FLAG_UNSET(img, IMF_IMAGE_FLAG_HAS_ALPHA)
 
-bool is_imf_image(VALUE obj);
 imf_image_t *get_imf_image(VALUE obj);
 
 /* JpegSourceManager */

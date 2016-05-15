@@ -99,7 +99,7 @@ static rb_data_type_t imf_image_data_type = {
 };
 
 bool
-is_imf_image(VALUE obj)
+imf_is_image(VALUE obj)
 {
   return rb_typeddata_is_kind_of(obj, &imf_image_data_type);
 }
@@ -193,7 +193,7 @@ imf_load_jpeg(VALUE obj, VALUE image_source)
   volatile VALUE buffer;
   JOCTET *buffer_ptr;
 
-  assert(is_imf_image(obj));
+  assert(imf_is_image(obj));
   assert(!NIL_P(image_source));
   assert(rb_obj_is_kind_of(image_source, imf_cIMF_ImageSource));
 
@@ -343,7 +343,7 @@ imf_load_png_body(VALUE arg)
   png_bytep buffer_ptr;
 
   assert(ctx != NULL);
-  assert(is_imf_image(ctx->image_obj));
+  assert(imf_is_image(ctx->image_obj));
   assert(!NIL_P(ctx->image_source));
   assert(rb_obj_is_kind_of(ctx->image_source, imf_cIMF_ImageSource));
 
@@ -480,7 +480,7 @@ imf_load_png(VALUE image_obj, VALUE image_source)
 {
   struct imf_png_read_context ctx;
 
-  assert(is_imf_image(image_obj));
+  assert(imf_is_image(image_obj));
   assert(!NIL_P(image_source));
   assert(rb_obj_is_kind_of(image_source, imf_cIMF_ImageSource));
 

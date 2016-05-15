@@ -22,6 +22,8 @@ typedef _Bool bool;
 # define false 0
 #endif
 
+bool imf_is_image(VALUE obj);
+
 RUBY_EXTERN VALUE imf_mIMF;
 RUBY_EXTERN VALUE imf_cIMF_Image;
 RUBY_EXTERN VALUE imf_cIMF_ImageSource;
