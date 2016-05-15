@@ -104,7 +104,7 @@ imf_is_image(VALUE obj)
 }
 
 imf_image_t *
-get_imf_image(VALUE obj)
+imf_get_image_data(VALUE obj)
 {
   imf_image_t *ptr;
   TypedData_Get_Struct(obj, imf_image_t, &imf_image_data_type, ptr);
@@ -119,17 +119,7 @@ imf_image_alloc(VALUE klass)
   return obj;
 }
 
-static void
-imf_jpeg_error_exit(j_common_ptr cinfo)
-{
-  char buffer[JMSG_LENGTH_MAX] = { '\0', };
-
-  (*cinfo->err->format_message)(cinfo, buffer);
-
-  rb_raise(rb_eRuntimeError, "JPEG ERROR: %s", buffer);
-}
-
-static void
+void
 imf_image_allocate_image_buffer(imf_image_t *img)
 {
   assert(img->width > 0);
@@ -179,72 +169,6 @@ imf_png_guess(VALUE image_source)
   VALUE res = rb_funcall(png_format, id_detect, 1, image_source);
   rb_funcall(image_source, id_rewind, 0);
   return RTEST(res);
-}
-
-
-static void
-imf_load_jpeg(VALUE obj, VALUE image_source)
-{
-  imf_image_t *img;
-  struct jpeg_decompress_struct cinfo;
-  struct jpeg_error_mgr jerr;
-  volatile VALUE srcmgr;
-  volatile VALUE buffer;
-  JOCTET *buffer_ptr;
-
-  assert(imf_is_image(obj));
-  assert(!NIL_P(image_source));
-  assert(rb_obj_is_kind_of(image_source, imf_cIMF_ImageSource));
-
-  img = get_imf_image(obj);
-
-  cinfo.err = jpeg_std_error(&jerr);
-  cinfo.err->error_exit = imf_jpeg_error_exit;
-
-  jpeg_create_decompress(&cinfo);
-
-  /* setup source manager */
-  srcmgr = imf_jpeg_init_image_source(&cinfo, image_source);
-
-  jpeg_read_header(&cinfo, TRUE);
-  jpeg_start_decompress(&cinfo);
-
-  /* allocate image buffer */
-  img->color_space = IMF_COLOR_SPACE_RGB;
-  IMF_IMAGE_UNSET_ALPHA(img);
-  img->component_size = sizeof(JSAMPLE);
-  img->pixel_channels = cinfo.output_components;
-  img->width = cinfo.output_width;
-  img->height = cinfo.output_height;
-
-  imf_image_allocate_image_buffer(img);
-
-  /* allocate temporary scanline buffer */
-  buffer = rb_str_tmp_new(sizeof(JSAMPLE) * cinfo.output_width * cinfo.output_components);
-  buffer_ptr = (JOCTET *) RSTRING_PTR(buffer);
-
-  size_t y = 0;
-  while (cinfo.output_scanline < cinfo.output_height) {
-    size_t x, ch;
-    jpeg_read_scanlines(&cinfo, &buffer_ptr, 1);
-
-    size_t i = y * img->row_stride;
-    for (x = 0; x < img->width; ++x) {
-      size_t j = x * img->pixel_channels;
-      for (ch = 0; ch < img->pixel_channels; ++ch) {
-        ((JSAMPLE *)img->channels[ch])[i + x] = buffer_ptr[j + ch];
-      }
-    }
-
-    ++y;
-  }
-
-  /* release temporary buffer memory */
-  buffer_ptr = NULL;
-  rb_str_resize(buffer, 0L);
-
-  jpeg_finish_decompress(&cinfo);
-  jpeg_destroy_decompress(&cinfo);
 }
 
 static void
@@ -346,7 +270,7 @@ imf_load_png_body(VALUE arg)
   assert(!NIL_P(ctx->image_source));
   assert(rb_obj_is_kind_of(ctx->image_source, imf_cIMF_ImageSource));
 
-  img = get_imf_image(ctx->image_obj);
+  img = imf_get_image_data(ctx->image_obj);
 
   ctx->png_ptr = imf_png_create_read_struct(ctx->image_obj);
   IMF_PNG_TRY_WITH_GC(ctx->info_ptr = png_create_info_struct(ctx->png_ptr));
@@ -492,44 +416,96 @@ imf_load_png(VALUE image_obj, VALUE image_source)
   rb_ensure(imf_load_png_body, (VALUE)&ctx, imf_load_png_ensure, (VALUE)&ctx);
 }
 
-static VALUE
-imf_image_s_load_image(int argc, VALUE *argv, VALUE klass)
+VALUE
+imf_find_file_format_by_filename(VALUE path_value)
 {
-  VALUE obj, image_source, path_value;
-  imf_image_t *img;
   char const *path, *e;
   long path_len;
 
-  rb_scan_args(argc, argv, "10", &image_source);
+  Check_Type(path_value, T_STRING);
 
-  obj = imf_image_alloc(klass);
-  img = get_imf_image(obj);
+  path = StringValueCStr(path_value);
+  path_len = RSTRING_LEN(path_value);
+  e = ruby_enc_find_extname(path, &path_len, rb_enc_get(path_value));
+  if (path_len <= 1)
+    return Qnil;
+  if (memcmp(e, ".jpg", path_len) == 0) {
+    VALUE c, fmt_obj;
+    rb_require("IMF/file_format/jpeg");
+    c = rb_const_get(imf_mIMF, rb_intern_const("FileFormat"));
+    c = rb_const_get(c, rb_intern_const("JPEG"));
+    fmt_obj = rb_class_new_instance(0, NULL, c);
+    return fmt_obj;
+  }
+
+  if (memcmp(e, ".png", path_len) == 0) {
+    /* FIXME */
+    return Qtrue;
+  }
+
+  return Qnil;
+}
+
+VALUE
+imf_detect_file_format(VALUE imgsrc_obj)
+{
+  if (imf_jpeg_guess(imgsrc_obj)) {
+    VALUE c, fmt_obj;
+    rb_require("IMF/file_format/jpeg");
+    c = rb_const_get(imf_mIMF, rb_intern_const("FileFormat"));
+    c = rb_const_get(c, rb_intern_const("JPEG"));
+    fmt_obj = rb_class_new_instance(0, NULL, c);
+    return fmt_obj;
+  }
+  if (imf_png_guess(imgsrc_obj))
+    return Qtrue;
+  return Qnil;
+}
+
+static VALUE
+imf_image_s_load_image(int argc, VALUE *argv, VALUE klass)
+{
+  VALUE image_obj, imgsrc_obj, path_value, fmt_obj;
+  imf_image_t *img;
+
+  /* TODO: support optional loading parameters */
+  rb_scan_args(argc, argv, "10", &imgsrc_obj);
+
+  image_obj = imf_image_alloc(klass);
+  img = imf_get_image_data(image_obj);
 
   /* TODO: Need to generalize */
-  path_value = rb_funcall(image_source, id_path, 0);
+  path_value = rb_funcall(imgsrc_obj, id_path, 0);
   if (!NIL_P(path_value)) {
     FilePathStringValue(path_value);
-    path = StringValueCStr(path_value);
-    path_len = RSTRING_LEN(path_value);
-    e = ruby_enc_find_extname(path, &path_len, rb_enc_get(path_value));
-    if (path_len <= 1)
+    fmt_obj = imf_find_file_format_by_filename(path_value);
+    if (NIL_P(fmt_obj))
       goto guess_format;
-    if (memcmp(e, ".jpg", path_len) == 0 && imf_jpeg_guess(image_source)) {
-    jpeg_format:
-      imf_load_jpeg(obj, image_source);
-      return obj;
+    if (RB_SPECIAL_CONST_P(fmt_obj)) {
+      if (fmt_obj == Qtrue) {
+        if (imf_png_guess(imgsrc_obj)) {
+        png_format:
+          /* FIXME: Need to generalize */
+          imf_load_png(image_obj, imgsrc_obj);
+          return image_obj;
+        }
+      }
     }
-    if (memcmp(e, ".png", path_len) == 0 && imf_png_guess(image_source)) {
-    png_format:
-      imf_load_png(obj, image_source);
-      return obj;
+    else if (rb_typeddata_is_kind_of(fmt_obj, &imf_file_format_data_type)) {
+      if (imf_file_format_detect(fmt_obj, imgsrc_obj)) {
+      detected_file_format:
+        imf_file_format_load(fmt_obj, image_obj, imgsrc_obj);
+        return image_obj;
+      }
     }
   }
 
 guess_format:
-  if (imf_jpeg_guess(image_source))
-    goto jpeg_format;
-  if (imf_png_guess(image_source))
+  fmt_obj = imf_detect_file_format(imgsrc_obj);
+  if (rb_typeddata_is_kind_of(fmt_obj, &imf_file_format_data_type))
+    goto detected_file_format;
+  else if (fmt_obj == Qtrue)
+    /* FIXME */
     goto png_format;
 
 unknown:
@@ -539,7 +515,7 @@ unknown:
 static VALUE
 imf_image_get_color_space(VALUE obj)
 {
-  imf_image_t *img = get_imf_image(obj);
+  imf_image_t *img = imf_get_image_data(obj);
 
   switch (img->color_space) {
     case IMF_COLOR_SPACE_GRAY:
@@ -554,42 +530,42 @@ imf_image_get_color_space(VALUE obj)
 static VALUE
 imf_image_has_alpha(VALUE obj)
 {
-  imf_image_t *img = get_imf_image(obj);
+  imf_image_t *img = imf_get_image_data(obj);
   return IMF_IMAGE_HAS_ALPHA(img) ? Qtrue : Qfalse;
 }
 
 static VALUE
 imf_image_get_component_size(VALUE obj)
 {
-  imf_image_t *img = get_imf_image(obj);
+  imf_image_t *img = imf_get_image_data(obj);
   return INT2FIX(img->component_size);
 }
 
 static VALUE
 imf_image_get_pixel_channels(VALUE obj)
 {
-  imf_image_t *img = get_imf_image(obj);
+  imf_image_t *img = imf_get_image_data(obj);
   return INT2FIX(img->pixel_channels);
 }
 
 static VALUE
 imf_image_get_width(VALUE obj)
 {
-  imf_image_t *img = get_imf_image(obj);
+  imf_image_t *img = imf_get_image_data(obj);
   return UINT2NUM(img->width);
 }
 
 static VALUE
 imf_image_get_height(VALUE obj)
 {
-  imf_image_t *img = get_imf_image(obj);
+  imf_image_t *img = imf_get_image_data(obj);
   return UINT2NUM(img->height);
 }
 
 static VALUE
 imf_image_get_row_stride(VALUE obj)
 {
-  imf_image_t *img = get_imf_image(obj);
+  imf_image_t *img = imf_get_image_data(obj);
   return UINT2NUM(img->row_stride);
 }
 
@@ -611,7 +587,6 @@ Init_imf_image(void)
   rb_require("IMF/file_format");
 }
 
-void Init_imf_jpeg_src_mgr(void);
 void Init_imf_file_format(void);
 
 void
@@ -621,7 +596,6 @@ Init_native(void)
 
   Init_imf_image();
   Init_imf_file_format();
-  Init_imf_jpeg_src_mgr();
 
   imf_cIMF_ImageSource = rb_define_class_under(imf_mIMF, "ImageSource", rb_cObject);
 
