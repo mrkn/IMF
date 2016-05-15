@@ -46,10 +46,9 @@ VALUE imf_cIMF_Image;
 VALUE imf_cIMF_ImageSource;
 
 static ID id_detect;
+static ID id_path;
 static ID id_read;
 static ID id_rewind;
-
-static ID id_ivar_path;
 
 static void
 imf_image_mark(void *ptr)
@@ -507,7 +506,7 @@ imf_image_s_load_image(int argc, VALUE *argv, VALUE klass)
   img = get_imf_image(obj);
 
   /* TODO: Need to generalize */
-  path_value = rb_ivar_get(image_source, id_ivar_path);
+  path_value = rb_funcall(image_source, id_path, 0);
   if (!NIL_P(path_value)) {
     FilePathStringValue(path_value);
     path = StringValueCStr(path_value);
@@ -627,8 +626,7 @@ Init_native(void)
   imf_cIMF_ImageSource = rb_define_class_under(imf_mIMF, "ImageSource", rb_cObject);
 
   id_detect = rb_intern("detect");
+  id_path = rb_intern("path");
   id_read = rb_intern("read");
   id_rewind = rb_intern("rewind");
-
-  id_ivar_path = rb_intern("@path");
 }
