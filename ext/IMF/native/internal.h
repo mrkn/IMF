@@ -3,12 +3,6 @@
 
 #include "IMF.h"
 
-#include <png.h>
-
-#ifndef HAVE_TYPE_PNG_ALLOC_SIZE_T
-typedef png_size_t png_alloc_size_t;
-#endif
-
 /* Image */
 
 imf_image_t *imf_get_image_data(VALUE obj);
