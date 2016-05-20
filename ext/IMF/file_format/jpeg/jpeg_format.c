@@ -4,8 +4,13 @@
 #include <jpeglib.h>
 #include <jerror.h>
 
+static char const JPEG_MAGIC_BYTES[] = "\xff\xd8";
+static size_t const JPEG_MAGIC_LENGTH = sizeof(JPEG_MAGIC_BYTES) - 1;
+
 static VALUE cSourceManager;
+static ID id_detect;
 static ID id_read;
+static ID id_rewind;
 
 enum imf_jpeg_src_mgr_constants {
   IMF_JPEG_BUFFER_SIZE = 8192,
@@ -162,7 +167,7 @@ struct imf_jpeg_format {
 };
 
 static char const *const extnames[] = {
-  ".jpg", ".jpeg", NULL
+  ".jpg", ".jpeg", ".jpe", ".jfif", NULL
 };
 
 static int detect_jpeg(imf_file_format_t *fmt, VALUE image_source);
@@ -225,6 +230,16 @@ jpeg_format_alloc(VALUE klass)
 static int
 detect_jpeg(imf_file_format_t *fmt, VALUE image_source)
 {
+  VALUE magic_value;
+  char const *magic;
+
+  magic_value = rb_funcall(image_source, id_read, 1, INT2FIX(JPEG_MAGIC_LENGTH));
+  rb_funcall(image_source, id_rewind, 0);
+
+  magic = StringValuePtr(magic_value);
+  if (RSTRING_LEN(magic_value) == JPEG_MAGIC_LENGTH &&
+      memcmp(JPEG_MAGIC_BYTES, magic, JPEG_MAGIC_LENGTH) == 0)
+    return 1;
   return 0;
 }
 
@@ -316,5 +331,7 @@ Init_jpeg(void)
 
   rb_define_alloc_func(cJPEG, jpeg_format_alloc);
 
+  id_detect = rb_intern("detect");
   id_read = rb_intern("read");
+  id_rewind = rb_intern("rewind");
 }

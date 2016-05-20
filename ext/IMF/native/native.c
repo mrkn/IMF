@@ -153,22 +153,30 @@ imf_image_allocate_image_buffer(imf_image_t *img)
   }
 }
 
-static bool
+static VALUE
 imf_jpeg_guess(VALUE image_source)
 {
-  VALUE jpeg_format = rb_path2class("IMF::FileFormat::JpegFormat");
-  VALUE res = rb_funcall(jpeg_format, id_detect, 1, image_source);
-  rb_funcall(image_source, id_rewind, 0);
-  return RTEST(res);
+  VALUE c, fmt_obj;
+  rb_require("IMF/file_format/jpeg");
+  c = rb_const_get(imf_mIMF, rb_intern_const("FileFormat"));
+  c = rb_const_get(c, rb_intern_const("JPEG"));
+  fmt_obj = rb_class_new_instance(0, NULL, c);
+  if (RTEST(imf_file_format_detect(fmt_obj, image_source)))
+    return fmt_obj;
+  return Qnil;
 }
 
-static bool
+static VALUE
 imf_png_guess(VALUE image_source)
 {
-  VALUE png_format = rb_path2class("IMF::FileFormat::PngFormat");
-  VALUE res = rb_funcall(png_format, id_detect, 1, image_source);
-  rb_funcall(image_source, id_rewind, 0);
-  return RTEST(res);
+  VALUE c, fmt_obj;
+  rb_require("IMF/file_format/png");
+  c = rb_const_get(imf_mIMF, rb_intern_const("FileFormat"));
+  c = rb_const_get(c, rb_intern_const("PNG"));
+  fmt_obj = rb_class_new_instance(0, NULL, c);
+  if (RTEST(imf_file_format_detect(fmt_obj, image_source)))
+    return fmt_obj;
+  return Qnil;
 }
 
 VALUE
@@ -208,22 +216,16 @@ imf_find_file_format_by_filename(VALUE path_value)
 VALUE
 imf_detect_file_format(VALUE imgsrc_obj)
 {
-  if (imf_jpeg_guess(imgsrc_obj)) {
-    VALUE c, fmt_obj;
-    rb_require("IMF/file_format/jpeg");
-    c = rb_const_get(imf_mIMF, rb_intern_const("FileFormat"));
-    c = rb_const_get(c, rb_intern_const("JPEG"));
-    fmt_obj = rb_class_new_instance(0, NULL, c);
+  VALUE fmt_obj;
+
+  fmt_obj = imf_jpeg_guess(imgsrc_obj);
+  if (!NIL_P(fmt_obj))
     return fmt_obj;
-  }
-  if (imf_png_guess(imgsrc_obj)) {
-    VALUE c, fmt_obj;
-    rb_require("IMF/file_format/png");
-    c = rb_const_get(imf_mIMF, rb_intern_const("FileFormat"));
-    c = rb_const_get(c, rb_intern_const("PNG"));
-    fmt_obj = rb_class_new_instance(0, NULL, c);
+
+  fmt_obj = imf_png_guess(imgsrc_obj);
+  if (!NIL_P(fmt_obj))
     return fmt_obj;
-  }
+
   return Qnil;
 }
 

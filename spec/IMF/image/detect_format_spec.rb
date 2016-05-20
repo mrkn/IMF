@@ -103,7 +103,7 @@ RSpec.describe IMF::Image, '.detect_format' do
     include_examples 'Normal conditions', :gif
   end
 
-  context 'Given a JPEG image' do
+  xcontext 'Given a JPEG image' do
     let(:image_filename) do
       fixture_file("momosan.jpg")
     end
@@ -111,7 +111,7 @@ RSpec.describe IMF::Image, '.detect_format' do
     include_examples 'Normal conditions', :jpeg
   end
 
-  context 'Given a PNG image' do
+  xcontext 'Given a PNG image' do
     let(:image_filename) do
       fixture_file("vimlogo-141x141.png")
     end

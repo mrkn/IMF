@@ -6,7 +6,12 @@
 typedef png_size_t png_alloc_size_t;
 #endif
 
+static char const PNG_MAGIC_BYTES[] = "\x89PNG\x0d\x0a\x1a\x0a";
+static size_t const PNG_MAGIC_LENGTH = sizeof(PNG_MAGIC_BYTES) - 1;
+
+static ID id_detect;
 static ID id_read;
+static ID id_rewind;
 
 typedef struct imf_png_format imf_png_format_t;
 struct imf_png_format {
@@ -83,6 +88,16 @@ png_format_alloc(VALUE klass)
 static int
 detect_png(imf_file_format_t *fmt, VALUE image_source)
 {
+  VALUE magic_value;
+  char const *magic;
+
+  magic_value = rb_funcall(image_source, id_read, 1, INT2FIX(PNG_MAGIC_LENGTH));
+  rb_funcall(image_source, id_rewind, 0);
+
+  magic = StringValuePtr(magic_value);
+  if (RSTRING_LEN(magic_value) == PNG_MAGIC_LENGTH &&
+      memcmp(PNG_MAGIC_BYTES, magic, PNG_MAGIC_LENGTH) == 0)
+    return 1;
   return 0;
 }
 
@@ -343,5 +358,7 @@ Init_png(void)
 
   rb_define_alloc_func(cPNG, png_format_alloc);
 
+  id_detect = rb_intern("detect");
   id_read = rb_intern("read");
+  id_rewind = rb_intern("rewind");
 }
