@@ -5,6 +5,15 @@ module IMF
     class InvalidSourceError < IMF::Error
     end
 
+    def self.new(source)
+      case source
+      when self
+        source
+      else
+        super
+      end
+    end
+
     def initialize(source)
       @buffer = '\0' * INITIAL_BUFFER_SIZE
       @read_size = 0
@@ -19,6 +28,8 @@ module IMF
         init_with_readable(source)
       end
     end
+
+    attr_reader :path
 
     def read(length = nil, outbuf = '')
       init_with_io(File.open(@path, 'rb')) unless @source

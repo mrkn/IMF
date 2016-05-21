@@ -30,7 +30,7 @@ RSpec.describe IMF::Image, '.detect_format' do
       it 'raises ArgumentError' do
         expect {
           IMF::Image.detect_format(42)
-        }.to raise_error(ArgumentError)
+        }.to raise_error(IMF::ImageSource::InvalidSourceError)
       end
     end
 
@@ -50,7 +50,7 @@ RSpec.describe IMF::Image, '.detect_format' do
   shared_examples 'Normal conditions' do |image_format|
     context 'Given a filename of the image' do
       it "returns #{image_format.inspect}" do
-        expect(IMF::Image.detect_format(image_filename)).to eq(image_format)
+        expect(IMF::Image.detect_format(image_filename)).to be_a(image_format)
       end
     end
 
@@ -58,7 +58,7 @@ RSpec.describe IMF::Image, '.detect_format' do
       context 'When the IO object is readable' do
         it "returns #{image_format.inspect}, and does not close and rewind the passed IO object" do
           open(image_filename, "rb") do |io|
-            expect(IMF::Image.detect_format(io)).to eq(image_format)
+            expect(IMF::Image.detect_format(io)).to be_a(image_format)
             expect(io).not_to be_closed
             expect(io.tell).not_to eq(0)
           end
@@ -69,7 +69,7 @@ RSpec.describe IMF::Image, '.detect_format' do
     context 'Given a StringIO object of the image' do
       it "returns #{image_format}, and does not rewind the passed StringIO object" do
         strio = StringIO.new(IO.read(image_filename, mode: "rb"))
-        expect(IMF::Image.detect_format(strio)).to eq(image_format)
+        expect(IMF::Image.detect_format(strio)).to be_a(image_format)
         expect(strio.tell).not_to eq(0)
       end
     end
@@ -87,7 +87,7 @@ RSpec.describe IMF::Image, '.detect_format' do
 
       it "returns #{image_format}, and does not close and rewind the passed IO object" do
         Zlib::GzipReader.open(gzipped_image_filename) do |gzio|
-          expect(IMF::Image.detect_format(gzio)).to eq(image_format)
+          expect(IMF::Image.detect_format(gzio)).to be_a(image_format)
           expect(gzio).not_to be_closed
           expect(gzio.tell).not_to eq(0)
         end
@@ -100,7 +100,7 @@ RSpec.describe IMF::Image, '.detect_format' do
       fixture_file("vimlogo-141x141.gif")
     end
 
-    include_examples 'Normal conditions', :gif
+    include_examples 'Normal conditions', IMF::FileFormat::GIF
   end
 
   context 'Given a JPEG image' do
@@ -108,7 +108,7 @@ RSpec.describe IMF::Image, '.detect_format' do
       fixture_file("momosan.jpg")
     end
 
-    include_examples 'Normal conditions', :jpeg
+    include_examples 'Normal conditions', IMF::FileFormat::JPEG
   end
 
   context 'Given a PNG image' do
@@ -116,7 +116,7 @@ RSpec.describe IMF::Image, '.detect_format' do
       fixture_file("vimlogo-141x141.png")
     end
 
-    include_examples 'Normal conditions', :png
+    include_examples 'Normal conditions', IMF::FileFormat::PNG
   end
 
   context 'Given a WEBP image' do
@@ -124,6 +124,6 @@ RSpec.describe IMF::Image, '.detect_format' do
       fixture_file("momosan.webp")
     end
 
-    include_examples 'Normal conditions', :webp
+    include_examples 'Normal conditions', IMF::FileFormat::WEBP
   end
 end

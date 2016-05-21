@@ -1,5 +1,8 @@
 require 'spec_helper'
 
+require 'stringio'
+require 'zlib'
+
 RSpec.describe IMF::Image, '.open' do
   subject(:image) do
     IMF::Image.open(image_filename)
@@ -84,6 +87,39 @@ RSpec.describe IMF::Image, '.open' do
 
       before do
         IO.write(image_filename, IO.read(original_image_filename, mode: 'rb'), mode: 'wb')
+      end
+
+      it 'returns an image object' do
+        is_expected.to be_a(IMF::Image)
+        expect(subject.color_space).to eq(:RGB)
+        expect(subject.has_alpha?).to eq(false)
+        expect(subject.component_size).to eq(1)
+        expect(subject.pixel_channels).to eq(3)
+        expect(subject.width).to eq(809)
+        expect(subject.height).to eq(961)
+        expect(subject.row_stride).to eq(816)
+      end
+    end
+
+    context 'Given the image source is a Zlib::GzipReader', :run_in_tmpdir do
+      let(:image_filename) do
+        fixture_file("momosan.jpg")
+      end
+
+      let(:gzipped_source) do
+        StringIO.new.tap { |strio|
+          Zlib::GzipWriter.wrap(strio) do |gzio|
+            gzio.write(IO.read(image_filename, mode: 'rb'))
+          end
+        }.string
+      end
+
+      let(:source) do
+        Zlib::GzipReader.wrap(StringIO.new(gzipped_source))
+      end
+
+      subject(:image) do
+        IMF::Image.open(source)
       end
 
       it 'returns an image object' do
