@@ -78,7 +78,6 @@ typedef void imf_file_format_load_func(imf_file_format_t *fmt, imf_image_t *img,
 
 typedef struct imf_file_format_interface imf_file_format_interface_t;
 struct imf_file_format_interface {
-  char const *const *extnames;
   imf_file_format_detect_func *detect;
   imf_file_format_load_func *load;
 };
@@ -90,6 +89,16 @@ void imf_file_format_mark(void *ptr);
 void imf_file_format_free(void *ptr);
 size_t imf_file_format_memsize(void const *ptr);
 RUBY_EXTERN rb_data_type_t const imf_file_format_data_type;
+
+int imf_is_file_format_class(VALUE klass);
+
+static inline int
+imf_is_file_format(VALUE obj)
+{
+  return rb_typeddata_is_kind_of(obj, &imf_file_format_data_type);
+}
+
+void imf_register_file_format(VALUE file_format, char const *const *extnames);
 
 /* Classes and Modules */
 

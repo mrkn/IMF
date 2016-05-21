@@ -46,6 +46,7 @@ VALUE imf_cIMF_Image;
 VALUE imf_cIMF_ImageSource;
 
 static ID id_detect;
+static ID id_detect;
 static ID id_path;
 static ID id_read;
 static ID id_rewind;
@@ -154,82 +155,6 @@ imf_image_allocate_image_buffer(imf_image_t *img)
 }
 
 static VALUE
-imf_jpeg_guess(VALUE image_source)
-{
-  VALUE c, fmt_obj;
-  rb_require("IMF/file_format/jpeg");
-  c = rb_const_get(imf_mIMF, rb_intern_const("FileFormat"));
-  c = rb_const_get(c, rb_intern_const("JPEG"));
-  fmt_obj = rb_class_new_instance(0, NULL, c);
-  if (RTEST(imf_file_format_detect(fmt_obj, image_source)))
-    return fmt_obj;
-  return Qnil;
-}
-
-static VALUE
-imf_png_guess(VALUE image_source)
-{
-  VALUE c, fmt_obj;
-  rb_require("IMF/file_format/png");
-  c = rb_const_get(imf_mIMF, rb_intern_const("FileFormat"));
-  c = rb_const_get(c, rb_intern_const("PNG"));
-  fmt_obj = rb_class_new_instance(0, NULL, c);
-  if (RTEST(imf_file_format_detect(fmt_obj, image_source)))
-    return fmt_obj;
-  return Qnil;
-}
-
-VALUE
-imf_find_file_format_by_filename(VALUE path_value)
-{
-  char const *path, *e;
-  long path_len;
-
-  Check_Type(path_value, T_STRING);
-
-  path = StringValueCStr(path_value);
-  path_len = RSTRING_LEN(path_value);
-  e = ruby_enc_find_extname(path, &path_len, rb_enc_get(path_value));
-  if (path_len <= 1)
-    return Qnil;
-  if (memcmp(e, ".jpg", path_len) == 0) {
-    VALUE c, fmt_obj;
-    rb_require("IMF/file_format/jpeg");
-    c = rb_const_get(imf_mIMF, rb_intern_const("FileFormat"));
-    c = rb_const_get(c, rb_intern_const("JPEG"));
-    fmt_obj = rb_class_new_instance(0, NULL, c);
-    return fmt_obj;
-  }
-
-  if (memcmp(e, ".png", path_len) == 0) {
-    VALUE c, fmt_obj;
-    rb_require("IMF/file_format/png");
-    c = rb_const_get(imf_mIMF, rb_intern_const("FileFormat"));
-    c = rb_const_get(c, rb_intern_const("PNG"));
-    fmt_obj = rb_class_new_instance(0, NULL, c);
-    return fmt_obj;
-  }
-
-  return Qnil;
-}
-
-VALUE
-imf_detect_file_format(VALUE imgsrc_obj)
-{
-  VALUE fmt_obj;
-
-  fmt_obj = imf_jpeg_guess(imgsrc_obj);
-  if (!NIL_P(fmt_obj))
-    return fmt_obj;
-
-  fmt_obj = imf_png_guess(imgsrc_obj);
-  if (!NIL_P(fmt_obj))
-    return fmt_obj;
-
-  return Qnil;
-}
-
-static VALUE
 imf_image_s_load_image(int argc, VALUE *argv, VALUE klass)
 {
   VALUE image_obj, imgsrc_obj, path_value, fmt_obj;
@@ -241,14 +166,13 @@ imf_image_s_load_image(int argc, VALUE *argv, VALUE klass)
   image_obj = imf_image_alloc(klass);
   img = imf_get_image_data(image_obj);
 
-  /* TODO: Need to generalize */
   path_value = rb_funcall(imgsrc_obj, id_path, 0);
   if (!NIL_P(path_value)) {
     FilePathStringValue(path_value);
     fmt_obj = imf_find_file_format_by_filename(path_value);
     if (NIL_P(fmt_obj))
       goto guess_format;
-    if (rb_typeddata_is_kind_of(fmt_obj, &imf_file_format_data_type)) {
+    if (imf_is_file_format(fmt_obj)) {
       if (imf_file_format_detect(fmt_obj, imgsrc_obj)) {
       detected_file_format:
         imf_file_format_load(fmt_obj, image_obj, imgsrc_obj);
@@ -259,7 +183,7 @@ imf_image_s_load_image(int argc, VALUE *argv, VALUE klass)
 
 guess_format:
   fmt_obj = imf_detect_file_format(imgsrc_obj);
-  if (rb_typeddata_is_kind_of(fmt_obj, &imf_file_format_data_type))
+  if (imf_is_file_format(fmt_obj))
     goto detected_file_format;
 
 unknown:
@@ -337,8 +261,6 @@ Init_imf_image(void)
   rb_define_method(imf_cIMF_Image, "width", imf_image_get_width, 0);
   rb_define_method(imf_cIMF_Image, "height", imf_image_get_height, 0);
   rb_define_method(imf_cIMF_Image, "row_stride", imf_image_get_row_stride, 0);
-
-  rb_require("IMF/file_format");
 }
 
 void Init_imf_file_format(void);
@@ -349,6 +271,7 @@ Init_native(void)
   imf_mIMF = rb_define_module("IMF");
 
   Init_imf_image();
+
   Init_imf_file_format();
 
   imf_cIMF_ImageSource = rb_define_class_under(imf_mIMF, "ImageSource", rb_cObject);

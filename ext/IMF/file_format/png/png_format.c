@@ -24,7 +24,7 @@ struct imf_png_format {
   png_infop end_ptr;
 };
 
-static char const *const extnames[] = {
+static char const *const png_format_extnames[] = {
   ".png", NULL
 };
 
@@ -32,7 +32,6 @@ static int detect_png(imf_file_format_t *fmt, VALUE image_source);
 static void load_png(imf_file_format_t *fmt, imf_image_t *img, VALUE image_source);
 
 static imf_file_format_interface_t const png_format_interface = {
-  extnames,
   detect_png,
   load_png
 };
@@ -92,7 +91,6 @@ detect_png(imf_file_format_t *fmt, VALUE image_source)
   char const *magic;
 
   magic_value = rb_funcall(image_source, id_read, 1, INT2FIX(PNG_MAGIC_LENGTH));
-  rb_funcall(image_source, id_rewind, 0);
 
   magic = StringValuePtr(magic_value);
   if (RSTRING_LEN(magic_value) == PNG_MAGIC_LENGTH &&
@@ -361,4 +359,6 @@ Init_png(void)
   id_detect = rb_intern("detect");
   id_read = rb_intern("read");
   id_rewind = rb_intern("rewind");
+
+  imf_register_file_format(cPNG, png_format_extnames);
 }

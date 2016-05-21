@@ -100,6 +100,11 @@ module IMF
       global_file_format_registry.each(extname: extname, &block)
     end
 
+    def file_formats_for_filename(filename)
+      extname = File.extname(filename)
+      global_file_format_registry.file_formats_for_extname(extname)
+    end
+
     private
 
     def global_file_format_registry

@@ -166,7 +166,7 @@ struct imf_jpeg_format {
   int running;
 };
 
-static char const *const extnames[] = {
+static char const *const jpeg_format_extnames[] = {
   ".jpg", ".jpeg", ".jpe", ".jfif", NULL
 };
 
@@ -174,7 +174,6 @@ static int detect_jpeg(imf_file_format_t *fmt, VALUE image_source);
 static void load_jpeg(imf_file_format_t *fmt, imf_image_t *img, VALUE image_source);
 
 static imf_file_format_interface_t const jpeg_format_interface = {
-  extnames,
   detect_jpeg,
   load_jpeg
 };
@@ -234,7 +233,6 @@ detect_jpeg(imf_file_format_t *fmt, VALUE image_source)
   char const *magic;
 
   magic_value = rb_funcall(image_source, id_read, 1, INT2FIX(JPEG_MAGIC_LENGTH));
-  rb_funcall(image_source, id_rewind, 0);
 
   magic = StringValuePtr(magic_value);
   if (RSTRING_LEN(magic_value) == JPEG_MAGIC_LENGTH &&
@@ -334,4 +332,6 @@ Init_jpeg(void)
   id_detect = rb_intern("detect");
   id_read = rb_intern("read");
   id_rewind = rb_intern("rewind");
+
+  imf_register_file_format(cJPEG, jpeg_format_extnames);
 }

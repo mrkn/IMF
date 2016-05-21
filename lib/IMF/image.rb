@@ -11,23 +11,12 @@ module IMF
     extend FormatManagement
 
     def self.detect_format(file)
-      case file
-      when String, Pathname, URI
-        io = Kernel.open(file, 'rb')
-      when -> (obj) { obj.respond_to?(:read) }
-        io = file
-      else
-        raise ArgumentError, "The argument must be a filename or a reeadable IO"
-      end
-      each_registered_format do |format_name, format_plugin|
-        io.rewind
-        if format_plugin.detect(io)
-          return format_name
-        end
+      image_source = ImageSource.new(file)
+      IMF.each_file_format do |fmt_class|
+        fmt = fmt_class.new
+        return fmt if fmt.detect(image_source)
       end
       nil
-    ensure
-      io.close if io && io != file
     end
 
     def self.open(source)
