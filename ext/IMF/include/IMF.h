@@ -7,6 +7,10 @@
 # define SafeStringValueCStr(v) (rb_check_safe_obj(rb_string_value(&v)), StringValueCStr(v))
 #endif
 
+#ifndef RARRAY_AREF
+# define RARRAY_AREF(ary, n) (RARRAY_PTR(ary)[n])
+#endif
+
 #include <assert.h>
 
 #ifdef HAVE_STDBOOL_H
