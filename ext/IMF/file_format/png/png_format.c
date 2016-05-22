@@ -252,11 +252,11 @@ load_png_body(VALUE arg)
       png_set_palette_to_rgb(fmt->png_ptr);
       /* pass through */
     case PNG_COLOR_TYPE_RGB:
-      img->color_space = IMF_COLOR_SPACE_GRAY;
+      img->color_space = IMF_COLOR_SPACE_RGB;
       IMF_IMAGE_UNSET_ALPHA(img);
       img->pixel_channels = 3;
 #ifdef PNG_READ_FILLER_SUPPORTED
-      png_set_filler(fmt->png_ptr, 0, PNG_FILLER_BEFORE);
+      png_set_filler(fmt->png_ptr, 0, PNG_FILLER_AFTER);
       png_channels = 4;
 #else
       png_channels = 3;

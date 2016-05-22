@@ -247,6 +247,41 @@ imf_image_get_row_stride(VALUE obj)
   return UINT2NUM(img->row_stride);
 }
 
+static VALUE
+imf_image_get_pixel(VALUE obj, VALUE row_index_v, VALUE col_index_v)
+{
+  imf_image_t *img = imf_get_image_data(obj);
+  ssize_t i, j, row_index, col_index;
+  VALUE pixel;
+
+  row_index = NUM2SSIZET(row_index_v);
+  col_index = NUM2SSIZET(col_index_v);
+
+  if (row_index < 0) {
+    row_index += img->height;
+    if (row_index < 0)
+      return Qnil;
+  }
+  else if (row_index >= img->height)
+    return Qnil;
+
+  if (col_index < 0) {
+    col_index += img->width;
+    if (col_index < 0)
+      return Qnil;
+  }
+  else if (col_index >= img->width)
+    return Qnil;
+
+  pixel = rb_ary_new_capa(img->pixel_channels);
+  j = row_index * img->row_stride + col_index;
+  for (i = 0; i < img->pixel_channels; ++i) {
+    rb_ary_push(pixel, UINT2NUM(img->channels[i][j]));
+  }
+
+  return pixel;
+}
+
 void
 Init_imf_image(void)
 {
@@ -261,6 +296,7 @@ Init_imf_image(void)
   rb_define_method(imf_cIMF_Image, "width", imf_image_get_width, 0);
   rb_define_method(imf_cIMF_Image, "height", imf_image_get_height, 0);
   rb_define_method(imf_cIMF_Image, "row_stride", imf_image_get_row_stride, 0);
+  rb_define_method(imf_cIMF_Image, "[]", imf_image_get_pixel, 2);
 }
 
 void Init_imf_file_format(void);
