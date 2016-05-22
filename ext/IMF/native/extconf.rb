@@ -2,6 +2,8 @@ require 'mkmf'
 
 $CFLAGS += " -I#{File.expand_path('../../include', __FILE__)}"
 
+have_func('rb_ary_new_capa')
+
 dir_config('jpeg')
 
 unless have_header('jpeglib.h') && have_library('jpeg')

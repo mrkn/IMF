@@ -3,6 +3,10 @@
 
 #include "IMF.h"
 
+#ifndef HAVE_RB_ARY_NEW_CAPA
+# define rb_ary_new_capa rb_ary_new2
+#endif
+
 /* Image */
 
 imf_image_t *imf_get_image_data(VALUE obj);
