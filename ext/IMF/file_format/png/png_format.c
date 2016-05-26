@@ -255,12 +255,7 @@ load_png_body(VALUE arg)
       img->color_space = IMF_COLOR_SPACE_RGB;
       IMF_IMAGE_UNSET_ALPHA(img);
       img->pixel_channels = 3;
-#ifdef PNG_READ_FILLER_SUPPORTED
-      png_set_filler(fmt->png_ptr, 0, PNG_FILLER_AFTER);
-      png_channels = 4;
-#else
       png_channels = 3;
-#endif
       break;
     case PNG_COLOR_TYPE_RGB_ALPHA:
       img->color_space = IMF_COLOR_SPACE_RGB;
@@ -282,19 +277,16 @@ load_png_body(VALUE arg)
   fmt->buffer = rb_str_tmp_new(rowbytes);
   buffer_ptr = (png_bytep) RSTRING_PTR(fmt->buffer);
 
+  size_t const pixel_size = img->pixel_channels * img->component_size;
+  size_t const row_size = pixel_size * img->width;
+  uint8_t *row_base_ptr = img->data;
   size_t y = 0;
   while (y < height) {
-    size_t x, ch;
     png_read_row(fmt->png_ptr, buffer_ptr, NULL);
 
-    size_t i = y * img->row_stride;
-    for (x = 0; x < img->width; ++x) {
-      size_t j = x * png_channels;
-      for (ch = 0; ch < img->pixel_channels; ++ch) {
-        img->channels[ch][i + x] = buffer_ptr[j + ch];
-      }
-    }
+    memcpy(row_base_ptr, buffer_ptr, row_size);
 
+    row_base_ptr += img->row_stride;
     ++y;
   }
 #else

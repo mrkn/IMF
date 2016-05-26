@@ -292,19 +292,16 @@ load_jpeg(imf_file_format_t *base_fmt, imf_image_t *img, VALUE image_source)
   fmt->buffer = rb_str_tmp_new(sizeof(JSAMPLE) * cinfo->output_width * cinfo->output_components);
   buffer_ptr = (JOCTET *) RSTRING_PTR(fmt->buffer);
 
+  size_t const pixel_size = img->pixel_channels * img->component_size;
+  size_t const row_size = pixel_size * img->width;
+  uint8_t *row_base_ptr = img->data;
   size_t y = 0;
   while (cinfo->output_scanline < cinfo->output_height) {
-    size_t x, ch;
     jpeg_read_scanlines(cinfo, &buffer_ptr, 1);
 
-    size_t i = y * img->row_stride;
-    for (x = 0; x < img->width; ++x) {
-      size_t j = x * img->pixel_channels;
-      for (ch = 0; ch < img->pixel_channels; ++ch) {
-        ((JSAMPLE *)img->channels[ch])[i + x] = buffer_ptr[j + ch];
-      }
-    }
+    memcpy(row_base_ptr, buffer_ptr, row_size);
 
+    row_base_ptr += img->row_stride;
     ++y;
   }
 

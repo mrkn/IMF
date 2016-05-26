@@ -1,6 +1,7 @@
 require 'mkmf'
 
-$CFLAGS += " -I#{File.expand_path('../../include', __FILE__)}"
+imf_include_dir = File.expand_path('../../include', __FILE__)
+$CFLAGS += " -I#{imf_include_dir}"
 
 have_func('rb_ary_new_capa')
 

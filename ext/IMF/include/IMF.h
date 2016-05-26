@@ -52,7 +52,6 @@ struct imf_image {
   size_t row_stride;
   size_t height;
   uint8_t *data;
-  uint8_t **channels;
 };
 
 #define IMF_IMAGE(ptr) ((imf_image_t *)(ptr))

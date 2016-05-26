@@ -60,21 +60,13 @@ static void
 imf_image_free(void *ptr)
 {
   xfree(IMF_IMAGE(ptr)->data);
-  xfree(IMF_IMAGE(ptr)->channels);
   xfree(ptr);
-}
-
-static inline size_t
-imf_image_channel_size(imf_image_t const *const img)
-{
-  return img->row_stride * img->height;
 }
 
 static inline size_t
 imf_image_data_size(imf_image_t const *const img)
 {
-  size_t const channel_size = imf_image_channel_size(img);
-  size_t const data_size = img->pixel_channels * channel_size;
+  size_t const data_size = img->row_stride * img->height;
   return data_size;
 }
 
@@ -128,30 +120,8 @@ imf_image_allocate_image_buffer(imf_image_t *img)
   assert(img->pixel_channels > 0);
   assert(img->component_size > 0);
 
-  img->row_stride = imf_calculate_row_stride(img->width * img->component_size, 16);
+  img->row_stride = imf_calculate_row_stride(img->width, img->component_size, img->pixel_channels, 16);
   img->data = ALLOC_N(uint8_t, imf_image_data_size(img));
-  img->channels = ALLOC_N(uint8_t *, img->pixel_channels);
-
-  size_t const channel_size = imf_image_channel_size(img);
-  size_t const channel_size_x2 = 2 * channel_size;
-  size_t const channel_size_x3 = 3 * channel_size;
-
-  uint8_t *data = img->data;
-  uint8_t **channels = img->channels;
-
-  size_t i;
-  for (i = 0; i + 2 < img->pixel_channels; i += 3) {
-    channels[0] = data;
-    channels[1] = data + channel_size;
-    channels[2] = data + channel_size_x2;
-    data += channel_size_x3;
-    channels += 3;
-  }
-  for (; i < img->pixel_channels; ++i) {
-    channels[0] = data;
-    data += channel_size;
-    ++channels;
-  }
 }
 
 static VALUE
@@ -274,9 +244,23 @@ imf_image_get_pixel(VALUE obj, VALUE row_index_v, VALUE col_index_v)
     return Qnil;
 
   pixel = rb_ary_new_capa(img->pixel_channels);
-  j = row_index * img->row_stride + col_index;
-  for (i = 0; i < img->pixel_channels; ++i) {
-    rb_ary_push(pixel, UINT2NUM(img->channels[i][j]));
+
+  size_t const pixel_size = img->pixel_channels * img->component_size;
+  uint8_t const *const row_base_ptr = img->data + row_index * img->row_stride;
+  uint8_t const *pixel_ptr = row_base_ptr + col_index * pixel_size;
+
+  switch (img->component_size) {
+    case 1:
+      for (i = 0; i < img->pixel_channels; ++i, ++pixel_ptr) {
+        rb_ary_push(pixel, UINT2NUM(*pixel_ptr));
+      }
+      break;
+
+    case 2:
+      for (i = 0; i < img->pixel_channels; ++i, pixel_ptr += 2) {
+        rb_ary_push(pixel, ULONG2NUM(*(uint16_t *)pixel_ptr));
+      }
+      break;
   }
 
   return pixel;
