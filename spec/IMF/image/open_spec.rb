@@ -73,7 +73,7 @@ RSpec.describe IMF::Image, '.open' do
       expect(subject.pixel_channels).to eq(3)
       expect(subject.width).to eq(809)
       expect(subject.height).to eq(961)
-      expect(subject.row_stride).to eq(2432)
+      expect(subject.row_stride).to eq(2448)
     end
 
     context 'the given filename ends with ".png"', :run_in_tmpdir do
@@ -97,7 +97,7 @@ RSpec.describe IMF::Image, '.open' do
         expect(subject.pixel_channels).to eq(3)
         expect(subject.width).to eq(809)
         expect(subject.height).to eq(961)
-        expect(subject.row_stride).to eq(2432)
+        expect(subject.row_stride).to eq(2448)
       end
     end
 
@@ -130,7 +130,7 @@ RSpec.describe IMF::Image, '.open' do
         expect(subject.pixel_channels).to eq(3)
         expect(subject.width).to eq(809)
         expect(subject.height).to eq(961)
-        expect(subject.row_stride).to eq(2432)
+        expect(subject.row_stride).to eq(2448)
       end
     end
   end
