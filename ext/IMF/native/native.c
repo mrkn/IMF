@@ -161,6 +161,27 @@ unknown:
 }
 
 static VALUE
+imf_image_inspect(VALUE obj)
+{
+  char buf[64];
+  imf_image_t *img = imf_get_image_data(obj);
+
+  VALUE str;
+  VALUE cname = rb_class_name(CLASS_OF(obj));
+  str = rb_sprintf(
+    "#<%"PRIsVALUE":%p size=%"PRIuSIZE"x%"PRIuSIZE" ch=%u bits=%d row_stride=%"PRIuSIZE">",
+    cname, (void*)obj,
+    img->width, img->height,
+    img->pixel_channels,
+    img->component_size * 8,
+    img->row_stride
+  );
+  rb_obj_infect(str, obj);
+
+  return str;
+}
+
+static VALUE
 imf_image_get_color_space(VALUE obj)
 {
   imf_image_t *img = imf_get_image_data(obj);
@@ -273,6 +294,7 @@ Init_imf_image(void)
   rb_define_alloc_func(imf_cIMF_Image, imf_image_alloc);
 
   rb_define_singleton_method(imf_cIMF_Image, "load_image", imf_image_s_load_image, -1);
+  rb_define_method(imf_cIMF_Image, "inspect", imf_image_inspect, 0);
   rb_define_method(imf_cIMF_Image, "color_space", imf_image_get_color_space, 0);
   rb_define_method(imf_cIMF_Image, "has_alpha?", imf_image_has_alpha, 0);
   rb_define_method(imf_cIMF_Image, "component_size", imf_image_get_component_size, 0);
