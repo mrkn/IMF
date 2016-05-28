@@ -24,6 +24,8 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 end
 
+$LOAD_PATH.unshift File.expand_path("~/work/num_buffer/lib")
+
 require 'IMF'
 
 require 'fileutils'

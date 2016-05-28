@@ -8,6 +8,9 @@ module IMF
   end
 end
 
+$LOAD_PATH.unshift File.expand_path("~/work/num_buffer/lib")
+require "num_buffer"
+
 require "IMF/native"
 require "IMF/image"
 require "IMF/file_format_registry"

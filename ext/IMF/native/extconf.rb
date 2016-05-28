@@ -3,6 +3,9 @@ require 'mkmf'
 imf_include_dir = File.expand_path('../../include', __FILE__)
 $CFLAGS += " -I#{imf_include_dir}"
 
+num_buffer_dir = File.expand_path('~/work/num_buffer')
+$CFLAGS += " -I#{num_buffer_dir}/include"
+
 have_func('rb_ary_new_capa')
 
 dir_config('jpeg')
